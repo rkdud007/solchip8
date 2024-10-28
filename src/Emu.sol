@@ -106,6 +106,7 @@ contract Emu {
         bool[NUM_KEYS] keys;
         uint8 dt;
         uint8 st;
+        uint256 program_size;
     }
 
     Emulator emu;
@@ -160,11 +161,7 @@ contract Emu {
         execute(op);
     }
 
-    function getDisplay()
-        public
-        view
-        returns (bool[SCREEN_WIDTH * SCREEN_HEIGHT] memory)
-    {
+    function getDisplay() public view returns (bool[SCREEN_WIDTH * SCREEN_HEIGHT] memory) {
         return emu.screen;
     }
 
@@ -180,6 +177,7 @@ contract Emu {
         for (uint256 i = start; i < end; i++) {
             emu.ram[i] = data[i - start];
         }
+        emu.program_size = data.length;
     }
 
     function tickTimers() public {
@@ -204,6 +202,17 @@ contract Emu {
         return op;
     }
 
+    function run() public {
+        require(emu.program_size > 0, "Program size is 0");
+        for (uint256 i = 0; i < emu.program_size; i++) {
+            require(emu.pc < RAM_SIZE - 1, "Program counter out of bounds");
+            // Fetch the opcode
+            uint16 op = fetch();
+            // Execute the opcode
+            execute(op);
+        }
+    }
+
     function execute(uint16 op) internal {
         // 0000 - Nop - NOP
         if (op == 0x0000) return;
@@ -221,9 +230,7 @@ contract Emu {
             return;
         }
         // 00EE - RET
-        else if (
-            digit1 == 0x0 && digit2 == 0x0 && digit3 == 0xE && digit4 == 0xE
-        ) {
+        else if (digit1 == 0x0 && digit2 == 0x0 && digit3 == 0xE && digit4 == 0xE) {
             emu.pc = pop();
             return;
         }
@@ -364,17 +371,8 @@ contract Emu {
             uint8 x = digit2;
             uint8 nn = uint8(op & 0x00FF);
             // Pseudo-random number generation (not secure)
-            uint8 rand = uint8(
-                uint256(
-                    keccak256(
-                        abi.encodePacked(
-                            block.timestamp,
-                            blockhash(block.number - 1),
-                            emu.pc
-                        )
-                    )
-                ) % 256
-            );
+            uint8 rand =
+                uint8(uint256(keccak256(abi.encodePacked(block.timestamp, blockhash(block.number - 1), emu.pc))) % 256);
             emu.v_reg[x] = rand & nn;
             return;
         }
