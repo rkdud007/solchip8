@@ -12,6 +12,7 @@ Got helped alot from [An Introduction to Chip-8 Emulation using the Rust Program
 
 | Opcode | Mnemonic          | Description                                                         |
 | ------ | ----------------- | ------------------------------------------------------------------- |
+| 0000   | **NOP**           | Nothing                                                             |
 | 00E0   | **CLS**           | Clear the display                                                   |
 | 00EE   | **RET**           | Return from a subroutine                                            |
 | 1NNN   | **JP NNN**        | Jump to address `NNN`                                               |
