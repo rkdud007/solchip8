@@ -504,10 +504,6 @@ contract Emu {
         return emu.pc;
     }
 
-    function getFontset() public view returns (uint8[80] memory) {
-        return FONTSET;
-    }
-
     function getRAMValueAt(uint256 index) public view returns (uint8) {
         require(index < RAM_SIZE, "RAM index out of bounds");
         return emu.ram[index];

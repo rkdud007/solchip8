@@ -17,11 +17,7 @@ contract EmuTest is Test {
 
         // pc == START_ADDR
         uint16 pc = emulator.getPC();
-        assertEq(
-            pc,
-            0x200,
-            "Program counter should be reset to START_ADDR (0x200)"
-        );
+        assertEq(pc, 0x200, "Program counter should be reset to START_ADDR (0x200)");
     }
 
     function testExecuteSetVx() public {
@@ -106,13 +102,7 @@ contract EmuTest is Test {
         assertEq(xPos, 0, "Should be 0");
         assertEq(yPos, 0, "Should be 0");
 
-        uint8[5] memory pixelData = [
-            program[12],
-            program[13],
-            program[14],
-            program[15],
-            program[16]
-        ];
+        uint8[5] memory pixelData = [program[12], program[13], program[14], program[15], program[16]];
 
         // Iterate over each row of the pixel
         for (uint8 row = 0; row < 5; row++) {
@@ -133,11 +123,7 @@ contract EmuTest is Test {
                 console.log("Index: %s", index);
 
                 // Assert that the display pixel matches the expected value
-                assertEq(
-                    display[index],
-                    pixelShouldBeSet,
-                    "Pixel should be set"
-                );
+                assertEq(display[index], pixelShouldBeSet, "Pixel should be set");
             }
         }
     }
