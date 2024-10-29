@@ -1,17 +1,41 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
+/// @title Chip8 emulator
+/// @author @rkdud007
+/// @notice Emulates a Chip8 as a Solidity smart contract
 contract Emu {
-    uint256 constant SCREEN_WIDTH = 64;
-    uint256 constant SCREEN_HEIGHT = 32;
+    // -------------------------------------------------------------------------
+    // Constants
+    // -------------------------------------------------------------------------
 
-    uint16 constant START_ADDR = 0x200;
-    uint256 constant RAM_SIZE = 4096;
-    uint256 constant NUM_REGS = 16;
-    uint256 constant STACK_SIZE = 16;
-    uint256 constant NUM_KEYS = 16;
-    uint256 constant FONTSET_SIZE = 80;
+    /// @notice screen width 64 pixels
+    uint16 constant SCREEN_WIDTH = 64;
+    /// @notice screen height 32 pixels
+    uint16 constant SCREEN_HEIGHT = 32;
 
+    /// @notice size of RAM
+    uint16 constant RAM_SIZE = 4096;
+    /// @notice number of registers
+    uint8 constant NUM_REGS = 16;
+    /// @notice number of stack entries
+    uint8 constant STACK_SIZE = 16;
+    /// @notice number of keys
+    uint8 constant NUM_KEYS = 16;
+
+    // -------------------------------------------------------------------------
+    // Display
+    // -------------------------------------------------------------------------
+
+    /// @notice fontset size
+    uint8 constant FONTSET_SIZE = 80;
+
+    /// @notice fontset
+    /// @dev Most modern emulators will use that space to store the sprite data for font characters of all the
+    /// hexadecimal digits, that is characters of 0-9 and A-F. We could store this data at any fixed position in RAM, but this
+    /// space is already defined as empty anyway. Each character is made up of eight rows of five pixels, with each row using
+    /// a byte of data, meaning that each letter altogether takes up five bytes of data. The following diagram illustrates how
+    /// a character is stored as bytes
     uint8[FONTSET_SIZE] FONTSET = [
         0xF0,
         0x90,
@@ -96,20 +120,38 @@ contract Emu {
     ];
 
     struct Emulator {
+        /// @notice 16-bit program counter
         uint16 pc;
+        /// @notice 4KB RAM
         uint8[RAM_SIZE] ram;
+        /// @notice A 64x32 monochrome display
         bool[SCREEN_WIDTH * SCREEN_HEIGHT] screen;
+        /// @notice Sixteen 8-bit general purpose registers, referred to as V0 thru VF
         uint8[NUM_REGS] v_reg;
+        /// @notice Single 16-bit register used as a pointer for memory access, called the I Register
         uint16 i_reg;
+        /// @notice Stack pointer
         uint16 sp;
+        /// @notice 16-bit stack used for calling and returning from subroutines
         uint16[STACK_SIZE] stack;
+        /// @notice 16-key keyboard input
         bool[NUM_KEYS] keys;
+        /// @notice Delay timer
         uint8 dt;
+        /// @notice Sound timer
         uint8 st;
+        /// @notice Program size
         uint256 program_size;
     }
 
     Emulator emu;
+
+    // -------------------------------------------------------------------------
+    // Initialization
+    // -------------------------------------------------------------------------
+
+    /// @notice start address for program (usually 0x200)
+    uint16 constant START_ADDR = 0x200;
 
     constructor() {
         emu.pc = START_ADDR;
@@ -118,6 +160,7 @@ contract Emu {
         }
     }
 
+    /// @notice Reset the emulator
     function reset() public {
         emu.pc = START_ADDR;
         for (uint256 i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
@@ -142,42 +185,32 @@ contract Emu {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Emulation functions
+    // -------------------------------------------------------------------------
+
+    /// @notice Push a value onto the stack
     function push(uint16 val) internal {
         require(emu.sp < STACK_SIZE, "Stack overflow");
         emu.stack[emu.sp] = val;
         emu.sp += 1;
     }
 
+    /// @notice Pop a value from the stack
     function pop() internal returns (uint16) {
         require(emu.sp > 0, "Stack underflow");
         emu.sp -= 1;
         return emu.stack[emu.sp];
     }
 
+    /// @notice CPU processing loop
+    /// @dev This function is called once per tick of the CPU.
+    /// Fetch the next instruction, decode and execute it.
     function tick() public {
         // Fetch
         uint16 op = fetch();
         // Decode & execute
         execute(op);
-    }
-
-    function getDisplay() public view returns (bool[SCREEN_WIDTH * SCREEN_HEIGHT] memory) {
-        return emu.screen;
-    }
-
-    function keypress(uint256 idx, bool pressed) public {
-        require(idx < NUM_KEYS, "Invalid key index");
-        emu.keys[idx] = pressed;
-    }
-
-    function load(uint8[] memory data) public {
-        uint256 start = START_ADDR;
-        uint256 end = START_ADDR + data.length;
-        require(end <= RAM_SIZE, "Data too large to fit in RAM");
-        for (uint256 i = start; i < end; i++) {
-            emu.ram[i] = data[i - start];
-        }
-        emu.program_size = data.length;
     }
 
     function tickTimers() public {
@@ -193,6 +226,7 @@ contract Emu {
         }
     }
 
+    /// @notice Fetch the next instruction
     function fetch() public returns (uint16) {
         require(emu.pc + 1 < RAM_SIZE, "Program counter out of bounds");
         uint16 higher_byte = uint16(emu.ram[emu.pc]);
@@ -497,6 +531,36 @@ contract Emu {
             revert("Opcode not implemented");
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Frontend functions
+    // -------------------------------------------------------------------------
+
+    /// @notice Get display
+    function getDisplay() public view returns (bool[SCREEN_WIDTH * SCREEN_HEIGHT] memory) {
+        return emu.screen;
+    }
+
+    /// @notice Handle keypress event
+    function keypress(uint256 idx, bool pressed) public {
+        require(idx < NUM_KEYS, "Invalid key index");
+        emu.keys[idx] = pressed;
+    }
+
+    /// @notice Load program into memory
+    function load(uint8[] memory data) public {
+        uint256 start = START_ADDR;
+        uint256 end = START_ADDR + data.length;
+        require(end <= RAM_SIZE, "Data too large to fit in RAM");
+        for (uint256 i = start; i < end; i++) {
+            emu.ram[i] = data[i - start];
+        }
+        emu.program_size = data.length;
+    }
+
+    // -------------------------------------------------------------------------
+    // Utility functions
+    // -------------------------------------------------------------------------
 
     function getPC() public view returns (uint16) {
         return emu.pc;

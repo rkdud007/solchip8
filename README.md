@@ -4,9 +4,10 @@
 
 Got helped alot from [An Introduction to Chip-8 Emulation using the Rust Programming Language](https://aquova.net/chip8/chip8.pdf).
 
-- boolean screen support (64 x 32 pixels)
-- 16 registers
+- A 64x32 monochrome display
+- Sixteen 8-bit general purpose registers
 - 4096 bytes of RAM
+- Example [ROM games](./c8games/) from [Chip-8 Games Pack](https://www.zophar.net/pdroms/chip8/chip-8-games-pack.html)
 
 ### **Supported CHIP-8 Opcodes**
 
