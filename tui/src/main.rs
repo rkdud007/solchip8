@@ -1,4 +1,7 @@
-use std::io;
+use std::{
+    fs::File,
+    io::{self, Read},
+};
 
 use alloy::{
     network::Network,
@@ -9,11 +12,11 @@ use alloy::{
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
     buffer::Buffer,
-    layout::Rect,
-    style::Stylize,
+    layout::{Constraint, Direction, Layout, Rect},
+    style::{Color, Style, Stylize},
     symbols::border,
     text::{Line, Text},
-    widgets::{Block, Paragraph, Widget},
+    widgets::{Block, Borders, Paragraph, Widget},
     DefaultTerminal, Frame,
 };
 use Emu::{EmuInstance, Emulator};
@@ -659,6 +662,9 @@ sol! {
     }
 }
 
+const SCREEN_WIDTH: usize = 64;
+const SCREEN_HEIGHT: usize = 32;
+
 #[derive(Debug)]
 pub struct App<T, P, N>
 where
@@ -669,6 +675,7 @@ where
     contract: EmuInstance<T, P, N>,
     counter: u8,
     exit: bool,
+    display: [bool; SCREEN_WIDTH * SCREEN_HEIGHT],
 }
 
 impl<T, P, N> App<T, P, N>
@@ -677,11 +684,15 @@ where
     P: Provider<T, N>,
     N: Network,
 {
-    pub fn new(contract: EmuInstance<T, P, N>) -> Self {
+    pub async fn new(contract: EmuInstance<T, P, N>) -> Self {
+        let builder = contract.getDisplay();
+        let res = builder.call().await.unwrap();
+
         Self {
             contract,
             counter: 0,
             exit: false,
+            display: res._0,
         }
     }
     /// runs the application's main loop until the user quits
@@ -698,36 +709,54 @@ where
     }
 
     async fn handle_events(&mut self) -> io::Result<()> {
-        match event::read()? {
-            // it's important to check that the event is a key press event as
-            // crossterm also emits key release and repeat events on Windows.
-            Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
-                self.handle_key_event(key_event).await
+        if event::poll(std::time::Duration::from_millis(1000))? {
+            match event::read()? {
+                Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
+                    self.handle_key_event(key_event).await;
+                }
+                _ => {}
             }
-            _ => {}
-        };
+        }
         Ok(())
     }
 
     async fn handle_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
             KeyCode::Char('q') => self.exit(),
+            KeyCode::Char('s') => self.start().await,
             KeyCode::Left => self.decrement_counter(),
             KeyCode::Right => self.increment_counter().await,
             _ => {}
         }
     }
 
+    async fn start(&mut self) {
+        let mut rom = File::open("../c8games/PONG").expect("Unable to open file");
+        let mut buffer = Vec::new();
+
+        rom.read_to_end(&mut buffer).unwrap();
+        assert_ne!(buffer.len(), 0, "Chip8 bytes from file is empty");
+        let builder = self.contract.load(buffer.to_vec());
+        builder.call().await.unwrap();
+        println!("Program loaded");
+        self.update_display().await;
+    }
+
     fn exit(&mut self) {
         self.exit = true;
     }
 
+    async fn update_display(&mut self) {
+        let builder = self.contract.getDisplay();
+        let res = builder.call().await.unwrap();
+        self.display = res._0;
+    }
+
     async fn increment_counter(&mut self) {
         self.counter += 1;
-        let builder = self.contract.getDisplay();
-        let number = builder.call().await.unwrap();
-
-        println!("Retrieved number: {:?}", number);
+        let builder = self.contract.tick();
+        builder.call().await.unwrap();
+        self.update_display().await;
     }
 
     fn decrement_counter(&mut self) {
@@ -742,29 +771,39 @@ where
     N: Network,
 {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let title = Line::from(" Counter App Tutorial ".bold());
-        let instructions = Line::from(vec![
-            " Decrement ".into(),
-            "<Left>".blue().bold(),
-            " Increment ".into(),
-            "<Right>".blue().bold(),
-            " Quit ".into(),
-            "<Q> ".blue().bold(),
-        ]);
-        let block = Block::bordered()
-            .title(title.centered())
-            .title_bottom(instructions.centered())
-            .border_set(border::THICK);
+        // Calculate cell dimensions
+        let cell_width = area.width / SCREEN_WIDTH as u16;
+        let cell_height = area.height / SCREEN_HEIGHT as u16;
 
-        let counter_text = Text::from(vec![Line::from(vec![
-            "Value: ".into(),
-            self.counter.to_string().yellow(),
-        ])]);
+        // Iterate over each pixel in the display
+        for y in 0..SCREEN_HEIGHT {
+            for x in 0..SCREEN_WIDTH {
+                let index = y * SCREEN_WIDTH + x;
+                let pixel_on = self.display[index];
+                let cell_style = if pixel_on {
+                    Style::default().bg(Color::White)
+                } else {
+                    Style::default().bg(Color::Black)
+                };
 
-        Paragraph::new(counter_text)
-            .centered()
-            .block(block)
-            .render(area, buf);
+                // Calculate the position in the buffer
+                let x0 = area.left() + x as u16 * cell_width;
+                let y0 = area.top() + y as u16 * cell_height;
+
+                // Fill the cell area in the buffer
+                for dy in 0..cell_height {
+                    for dx in 0..cell_width {
+                        let buf_x = x0 + dx;
+                        let buf_y = y0 + dy;
+                        if buf_x < area.right() && buf_y < area.bottom() {
+                            buf.get_mut(buf_x, buf_y)
+                                .set_style(cell_style)
+                                .set_symbol(" ");
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -776,7 +815,7 @@ async fn main() -> io::Result<()> {
         .on_anvil_with_wallet();
 
     let contract = Emu::deploy(&provider).await.unwrap();
-    let app_result = App::new(contract).run(&mut terminal).await;
+    let app_result = App::new(contract).await.run(&mut terminal).await;
     ratatui::restore();
     app_result
 }
