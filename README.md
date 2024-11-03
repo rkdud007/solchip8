@@ -4,12 +4,16 @@
 
 Got helped alot from [An Introduction to Chip-8 Emulation using the Rust Programming Language](https://aquova.net/chip8/chip8.pdf).
 
+### Features
+
 - A 64x32 monochrome display
 - Sixteen 8-bit general purpose registers
 - 4096 bytes of RAM
 - Example [ROM games](./c8games/) from [Chip-8 Games Pack](https://www.zophar.net/pdroms/chip8/chip-8-games-pack.html)
 
 ### **Supported CHIP-8 Opcodes**
+
+Fully tested on [here](./test/Emu.t.sol)
 
 | Opcode | Mnemonic          | Description                                                         |
 | ------ | ----------------- | ------------------------------------------------------------------- |
@@ -48,3 +52,7 @@ Got helped alot from [An Introduction to Chip-8 Emulation using the Rust Program
 | FX33   | **LD B, Vx**      | Store BCD representation of `Vx` in memory at `I`, `I+1`, and `I+2` |
 | FX55   | **LD [I], Vx**    | Store registers `V0` to `Vx` in memory starting at `I`              |
 | FX65   | **LD Vx, [I]**    | Read registers `V0` to `Vx` from memory starting at `I`             |
+
+### Resources
+
+- [chip8](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#8xy3)

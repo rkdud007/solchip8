@@ -575,4 +575,70 @@ contract Emu {
         require(index < NUM_REGS, "V register index out of bounds");
         return emu.v_reg[index];
     }
+
+    function setVRegister(uint8 index, uint8 value) public {
+        require(index < NUM_REGS, "V register index out of bounds");
+        emu.v_reg[index] = value;
+    }
+
+    function getIRegister() public view returns (uint16) {
+        return emu.i_reg;
+    }
+
+    function setIRegister(uint16 value) public {
+        emu.i_reg = value;
+    }
+
+    function setRAMValueAt(uint256 index, uint8 value) public {
+        require(index < RAM_SIZE, "RAM index out of bounds");
+        emu.ram[index] = value;
+    }
+
+    function getDelayTimer() public view returns (uint8) {
+        return emu.dt;
+    }
+
+    function setDelayTimer(uint8 value) public {
+        emu.dt = value;
+    }
+
+    function getSoundTimer() public view returns (uint8) {
+        return emu.st;
+    }
+
+    function setSoundTimer(uint8 value) public {
+        emu.st = value;
+    }
+
+    function getSP() public view returns (uint16) {
+        return emu.sp;
+    }
+
+    function getStackValue(uint256 index) public view returns (uint16) {
+        require(index < STACK_SIZE, "Stack index out of bounds");
+        return emu.stack[index];
+    }
+
+    function setStackValue(uint256 index, uint16 value) public {
+        require(index < STACK_SIZE, "Stack index out of bounds");
+        emu.stack[index] = value;
+    }
+
+    function setSP(uint16 value) public {
+        emu.sp = value;
+    }
+
+    function setScreenPixel(uint256 index, bool value) public {
+        require(index < SCREEN_WIDTH * SCREEN_HEIGHT, "Index out of bounds");
+        emu.screen[index] = value;
+    }
+
+    function isDisplayCleared() public view returns (bool) {
+        for (uint256 i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
+            if (emu.screen[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
