@@ -10,6 +10,7 @@ Got helped alot from [An Introduction to Chip-8 Emulation using the Rust Program
 - Sixteen 8-bit general purpose registers
 - 4096 bytes of RAM
 - Example [ROM games](./c8games/) from [Chip-8 Games Pack](https://www.zophar.net/pdroms/chip8/chip-8-games-pack.html)
+- Demo [![Video Label](http://img.youtube.com/vi/4cni9DNQ0wA/0.jpg)](https://youtu.be/4cni9DNQ0wA?t=0s)
 
 ### **Supported CHIP-8 Opcodes**
 
