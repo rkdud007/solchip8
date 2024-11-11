@@ -15,5 +15,5 @@ cargo run -r
 anvil
 
 ```
-anvil -b 1 --no-request-size-limit --disable-block-gas-limit --disable-code-size-limit --disable-min-priority-fee
+anvil -b 0.2 --no-request-size-limit --disable-block-gas-limit --disable-code-size-limit --disable-min-priority-fee --slots-in-an-epoch 1 --order fifo
 ```

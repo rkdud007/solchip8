@@ -24,6 +24,23 @@ contract EmuTest is Test {
     // Instruction tests
     // -------------------------------------------------------------------------
 
+    // Test 1: NOP instruction (0x0000)
+    function testExecuteNOP() public {
+        // 0x0000: Nothing
+
+        uint8[] memory program = new uint8[](4);
+        program[0] = 0x00;
+        program[1] = 0x00;
+        program[2] = 0x00;
+        program[3] = 0x00;
+
+        emulator.load(program);
+        emulator.tick();
+        emulator.tick();
+
+        assertEq(emulator.getPC(), 0x204, "PC should be advanced by 2 after NOP instruction");
+    }
+
     // Test 2: CLS instruction (0x00E0)
     function testExecuteCLS() public {
         // 0x00E0: Clear the display
