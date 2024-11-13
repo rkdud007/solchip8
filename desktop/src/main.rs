@@ -670,6 +670,7 @@ sol! {
     }
 }
 
+/// credit https://github.com/aquova/chip8-book/blob/master/code/desktop/src/main.rs
 #[tokio::main]
 async fn main() {
     let args: Vec<_> = env::args().collect();

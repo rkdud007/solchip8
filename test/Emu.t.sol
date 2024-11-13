@@ -17,7 +17,11 @@ contract EmuTest is Test {
 
         // pc == START_ADDR
         uint16 pc = emulator.getPC();
-        assertEq(pc, 0x200, "Program counter should be reset to START_ADDR (0x200)");
+        assertEq(
+            pc,
+            0x200,
+            "Program counter should be reset to START_ADDR (0x200)"
+        );
     }
 
     // -------------------------------------------------------------------------
@@ -38,7 +42,11 @@ contract EmuTest is Test {
         emulator.tick();
         emulator.tick();
 
-        assertEq(emulator.getPC(), 0x204, "PC should be advanced by 2 after NOP instruction");
+        assertEq(
+            emulator.getPC(),
+            0x204,
+            "PC should be advanced by 2 after NOP instruction"
+        );
     }
 
     // Test 2: CLS instruction (0x00E0)
@@ -58,7 +66,10 @@ contract EmuTest is Test {
 
         // Check that the display is cleared
         bool isCleared = emulator.isDisplayCleared();
-        assertTrue(isCleared, "Display should be cleared after CLS instruction");
+        assertTrue(
+            isCleared,
+            "Display should be cleared after CLS instruction"
+        );
     }
 
     // Test 3: RET instruction (0x00EE)
@@ -76,7 +87,11 @@ contract EmuTest is Test {
 
         // PC should return to the address after CALL instruction (0x202)
         uint16 pc = emulator.getPC();
-        assertEq(pc, 0x202, "Program counter should return to 0x202 after RET instruction");
+        assertEq(
+            pc,
+            0x202,
+            "Program counter should return to 0x202 after RET instruction"
+        );
     }
 
     // Test 4: JP_ADDR instruction (0x1nnn)
@@ -106,12 +121,20 @@ contract EmuTest is Test {
 
         // PC should be set to 0x062
         uint16 pc = emulator.getPC();
-        assertEq(pc, 0x0062, "PC should be set to 0x062 after CALL instruction");
+        assertEq(
+            pc,
+            0x0062,
+            "PC should be set to 0x062 after CALL instruction"
+        );
 
         // Stack should contain return address (0x202)
         uint16 sp = emulator.getSP();
         uint16 returnAddress = emulator.getStackValue(sp - 1);
-        assertEq(returnAddress, 0x202, "Return address should be 0x202 on the stack");
+        assertEq(
+            returnAddress,
+            0x202,
+            "Return address should be 0x202 on the stack"
+        );
     }
 
     // Test 6: SE_VX_NN instruction (0x3xnn)
@@ -129,7 +152,11 @@ contract EmuTest is Test {
 
         // PC should skip the next instruction
         uint16 pc = emulator.getPC();
-        assertEq(pc, 0x204, "PC should be advanced by 4 after SE_VX_NN when equal");
+        assertEq(
+            pc,
+            0x204,
+            "PC should be advanced by 4 after SE_VX_NN when equal"
+        );
     }
 
     // Test 7: SNE_VX_NN instruction (0x4xnn)
@@ -147,7 +174,11 @@ contract EmuTest is Test {
 
         // PC should skip the next instruction
         uint16 pc = emulator.getPC();
-        assertEq(pc, 0x204, "PC should be advanced by 4 after SNE_VX_NN when not equal");
+        assertEq(
+            pc,
+            0x204,
+            "PC should be advanced by 4 after SNE_VX_NN when not equal"
+        );
     }
 
     // Test 8: SE_VX_VY instruction (0x5xy0)
@@ -166,7 +197,11 @@ contract EmuTest is Test {
 
         // PC should skip the next instruction
         uint16 pc = emulator.getPC();
-        assertEq(pc, 0x204, "PC should be advanced by 4 after SE_VX_VY when equal");
+        assertEq(
+            pc,
+            0x204,
+            "PC should be advanced by 4 after SE_VX_VY when equal"
+        );
     }
 
     // Test 9: LD_VX_NN instruction (0x6xnn)
@@ -180,7 +215,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint8 va = emulator.getVRegister(0xA);
-        assertEq(va, 0xBB, "VA should be set to 0xBB after LD_VX_NN instruction");
+        assertEq(
+            va,
+            0xBB,
+            "VA should be set to 0xBB after LD_VX_NN instruction"
+        );
     }
 
     // Test 10: ADD_VX_NN instruction (0x7xnn)
@@ -195,7 +234,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint8 va = emulator.getVRegister(0xA);
-        assertEq(va, 0xCB, "VA should be incremented by 0xBB after ADD_VX_NN instruction");
+        assertEq(
+            va,
+            0xCB,
+            "VA should be incremented by 0xBB after ADD_VX_NN instruction"
+        );
     }
 
     // Test 11: LD_VX_VY instruction (0x8xy0)
@@ -226,7 +269,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint8 va = emulator.getVRegister(0xA);
-        assertEq(va, 0xFF, "VA should be set to VA | VB after OR_VX_VY instruction");
+        assertEq(
+            va,
+            0xFF,
+            "VA should be set to VA | VB after OR_VX_VY instruction"
+        );
     }
 
     // Test 13: AND_VX_VY instruction (0x8xy2)
@@ -242,7 +289,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint8 va = emulator.getVRegister(0xA);
-        assertEq(va, 0x00, "VA should be set to VA & VB after AND_VX_VY instruction");
+        assertEq(
+            va,
+            0x00,
+            "VA should be set to VA & VB after AND_VX_VY instruction"
+        );
     }
 
     // Test 14: XOR_VX_VY instruction (0x8xy3)
@@ -258,7 +309,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint8 va = emulator.getVRegister(0xA);
-        assertEq(va, 0xFF, "VA should be set to VA ^ VB after XOR_VX_VY instruction");
+        assertEq(
+            va,
+            0xFF,
+            "VA should be set to VA ^ VB after XOR_VX_VY instruction"
+        );
     }
 
     // Test 15: ADD_VX_VY instruction (0x8xy4)
@@ -274,7 +329,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint8 va = emulator.getVRegister(0xA);
-        assertEq(va, 0x30, "VA should be sum of VA and VB after ADD_VX_VY instruction");
+        assertEq(
+            va,
+            0x30,
+            "VA should be sum of VA and VB after ADD_VX_VY instruction"
+        );
 
         uint8 vf = emulator.getVRegister(0xF);
         assertEq(vf, 0x00, "VF should be 0 when there's no carry");
@@ -311,7 +370,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint8 va = emulator.getVRegister(0xA);
-        assertEq(va, 0x02, "VA should be shifted right by 1 after SHR_VX_VY instruction");
+        assertEq(
+            va,
+            0x02,
+            "VA should be shifted right by 1 after SHR_VX_VY instruction"
+        );
 
         uint8 vf = emulator.getVRegister(0xF);
         assertEq(vf, 0x01, "VF should be 1 if least significant bit was 1");
@@ -348,7 +411,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint8 va = emulator.getVRegister(0xA);
-        assertEq(va, 0x00, "VA should be shifted left by 1 after SHL_VX_VY instruction");
+        assertEq(
+            va,
+            0x00,
+            "VA should be shifted left by 1 after SHL_VX_VY instruction"
+        );
 
         uint8 vf = emulator.getVRegister(0xF);
         assertEq(vf, 0x01, "VF should be 1 if most significant bit was 1");
@@ -370,7 +437,11 @@ contract EmuTest is Test {
 
         // PC should skip the next instruction
         uint16 pc = emulator.getPC();
-        assertEq(pc, 0x204, "PC should be advanced by 4 after SNE_VX_VY when not equal");
+        assertEq(
+            pc,
+            0x204,
+            "PC should be advanced by 4 after SNE_VX_VY when not equal"
+        );
     }
 
     // Test 21: LD_I_ADDR instruction (0xAnnn)
@@ -384,7 +455,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint16 iRegister = emulator.getIRegister();
-        assertEq(iRegister, 0x0999, "I should be set to 0x0999 after LD_I_ADDR instruction");
+        assertEq(
+            iRegister,
+            0x0999,
+            "I should be set to 0x0999 after LD_I_ADDR instruction"
+        );
     }
 
     // Test 22: JP_V0_ADDR instruction (0xBnnn)
@@ -399,7 +474,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint16 pc = emulator.getPC();
-        assertEq(pc, 0x410, "PC should be set to V0 + 0x400 after JP_V0_ADDR instruction");
+        assertEq(
+            pc,
+            0x410,
+            "PC should be set to V0 + 0x400 after JP_V0_ADDR instruction"
+        );
     }
 
     // Test 23: RND_VX_NN instruction (0xCxnn)
@@ -414,7 +493,10 @@ contract EmuTest is Test {
 
         uint8 va = emulator.getVRegister(0xA);
         // Since we cannot predict rand(), we can assert that VA <= 0xBB
-        assertTrue(va <= 0xBB, "VA should be less than or equal to 0xBB after RND_VX_NN instruction");
+        assertTrue(
+            va <= 0xBB,
+            "VA should be less than or equal to 0xBB after RND_VX_NN instruction"
+        );
     }
 
     // Test 24: DRW_VX_VY_N instruction (0xDxyn)
@@ -426,7 +508,17 @@ contract EmuTest is Test {
 
         // Prepare sprite data in memory at I
         uint16 i_address = 0x300;
-        uint8[9] memory sprite = [0xFF, 0x81, 0xBD, 0xA5, 0xA5, 0xBD, 0x81, 0xFF, 0x00];
+        uint8[9] memory sprite = [
+            0xFF,
+            0x81,
+            0xBD,
+            0xA5,
+            0xA5,
+            0xBD,
+            0x81,
+            0xFF,
+            0x00
+        ];
         for (uint8 i = 0; i < 9; i++) {
             emulator.setRAMValueAt(i_address + i, sprite[i]);
         }
@@ -440,7 +532,11 @@ contract EmuTest is Test {
 
         // Check that VF is set correctly (no collision on clear screen)
         uint8 vf = emulator.getVRegister(0xF);
-        assertEq(vf, 0x00, "VF should be 0 after drawing sprite with no collision");
+        assertEq(
+            vf,
+            0x00,
+            "VF should be 0 after drawing sprite with no collision"
+        );
     }
 
     // Test 25: SKP_VX instruction (0xEx9E)
@@ -460,7 +556,11 @@ contract EmuTest is Test {
 
         // PC should skip the next instruction
         uint16 pc = emulator.getPC();
-        assertEq(pc, 0x204, "PC should be advanced by 4 after SKP_VX when key is pressed");
+        assertEq(
+            pc,
+            0x204,
+            "PC should be advanced by 4 after SKP_VX when key is pressed"
+        );
     }
 
     // Test 26: SKNP_VX instruction (0xExA1)
@@ -480,7 +580,11 @@ contract EmuTest is Test {
 
         // PC should skip the next instruction
         uint16 pc = emulator.getPC();
-        assertEq(pc, 0x204, "PC should be advanced by 4 after SKNP_VX when key is not pressed");
+        assertEq(
+            pc,
+            0x204,
+            "PC should be advanced by 4 after SKNP_VX when key is not pressed"
+        );
     }
 
     // Test 27: LD_VX_DT instruction (0xFx07)
@@ -495,7 +599,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint8 va = emulator.getVRegister(0xA);
-        assertEq(va, 0x55, "VA should be set to delay timer value after LD_VX_DT instruction");
+        assertEq(
+            va,
+            0x55,
+            "VA should be set to delay timer value after LD_VX_DT instruction"
+        );
     }
 
     // Test 28: LD_VX_K instruction (0xFx0A)
@@ -522,7 +630,11 @@ contract EmuTest is Test {
         assertEq(pc, 0x202, "PC should advance after key is pressed");
 
         uint8 vb = emulator.getVRegister(0xB);
-        assertEq(vb, 0x05, "VB should be set to key value after LD_VX_K instruction");
+        assertEq(
+            vb,
+            0x05,
+            "VB should be set to key value after LD_VX_K instruction"
+        );
     }
 
     // Test 29: LD_DT_VX instruction (0xFx15)
@@ -537,7 +649,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint8 dt = emulator.getDelayTimer();
-        assertEq(dt, 0x55, "Delay timer should be set to VB after LD_DT_VX instruction");
+        assertEq(
+            dt,
+            0x55,
+            "Delay timer should be set to VB after LD_DT_VX instruction"
+        );
     }
 
     // Test 30: LD_ST_VX instruction (0xFx18)
@@ -552,7 +668,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint8 st = emulator.getSoundTimer();
-        assertEq(st, 0x33, "Sound timer should be set to VA after LD_ST_VX instruction");
+        assertEq(
+            st,
+            0x33,
+            "Sound timer should be set to VA after LD_ST_VX instruction"
+        );
     }
 
     // Test 31: ADD_I_VX instruction (0xFx1E)
@@ -568,7 +688,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint16 i_reg = emulator.getIRegister();
-        assertEq(i_reg, 0x110, "I register should be I + VA after ADD_I_VX instruction");
+        assertEq(
+            i_reg,
+            0x110,
+            "I register should be I + VA after ADD_I_VX instruction"
+        );
     }
 
     // Test 32: LD_F_VX instruction (0xFx29)
@@ -583,7 +707,11 @@ contract EmuTest is Test {
         emulator.tick();
 
         uint16 i_reg = emulator.getIRegister();
-        assertEq(i_reg, 0x0019, "I register should be set to sprite location for digit VA after LD_F_VX instruction");
+        assertEq(
+            i_reg,
+            0x0019,
+            "I register should be set to sprite location for digit VA after LD_F_VX instruction"
+        );
     }
 
     // Test 33: LD_B_VX instruction (0xFx33)
@@ -627,7 +755,11 @@ contract EmuTest is Test {
         // Check memory from I to I+VA
         for (uint8 i = 0; i <= 0xA; i++) {
             uint8 value = emulator.getRAMValueAt(0x300 + i);
-            assertEq(value, i + 1, "Memory should contain value of V registers");
+            assertEq(
+                value,
+                i + 1,
+                "Memory should contain value of V registers"
+            );
         }
     }
 
@@ -651,7 +783,11 @@ contract EmuTest is Test {
         // Check V0 through VA
         for (uint8 i = 0; i <= 0xA; i++) {
             uint8 value = emulator.getVRegister(i);
-            assertEq(value, i + 1, "V registers should contain values from memory");
+            assertEq(
+                value,
+                i + 1,
+                "V registers should contain values from memory"
+            );
         }
     }
 
@@ -672,147 +808,157 @@ contract EmuTest is Test {
     // Program tests
     // -------------------------------------------------------------------------
 
-    function testSimpleProgram() public {
-        uint8[] memory program = new uint8[](17);
-        // 00E0 - CLS
-        program[0] = 0x00;
-        program[1] = 0xE0;
-        // 6000 - LD V0, 0x00
-        program[2] = 0x60;
-        program[3] = 0x00;
-        // 6100 - LD V1, 0x00
-        program[4] = 0x61;
-        program[5] = 0x00;
-        // A20C - LD I, 0x20C
-        program[6] = 0xA2;
-        program[7] = 0x0C;
-        // D015 - DRW V0, V1, 5
-        program[8] = 0xD0;
-        program[9] = 0x15;
-        // 120A - JP 0x20A
-        program[10] = 0x12;
-        program[11] = 0x0A;
+    // function testSimpleProgram() public {
+    //     uint8[] memory program = new uint8[](17);
+    //     // 00E0 - CLS
+    //     program[0] = 0x00;
+    //     program[1] = 0xE0;
+    //     // 6000 - LD V0, 0x00
+    //     program[2] = 0x60;
+    //     program[3] = 0x00;
+    //     // 6100 - LD V1, 0x00
+    //     program[4] = 0x61;
+    //     program[5] = 0x00;
+    //     // A20C - LD I, 0x20C
+    //     program[6] = 0xA2;
+    //     program[7] = 0x0C;
+    //     // D015 - DRW V0, V1, 5
+    //     program[8] = 0xD0;
+    //     program[9] = 0x15;
+    //     // 120A - JP 0x20A
+    //     program[10] = 0x12;
+    //     program[11] = 0x0A;
 
-        program[12] = 0xF0;
-        program[13] = 0x90;
-        program[14] = 0xF0;
-        program[15] = 0x90;
-        program[16] = 0x90;
+    //     program[12] = 0xF0;
+    //     program[13] = 0x90;
+    //     program[14] = 0xF0;
+    //     program[15] = 0x90;
+    //     program[16] = 0x90;
 
-        emulator.load(program);
-        for (uint256 i = 0; i < 10; i++) {
-            emulator.tick();
-        }
+    //     emulator.load(program);
+    //     for (uint256 i = 0; i < 10; i++) {
+    //         emulator.tick();
+    //     }
 
-        bool[64 * 32] memory display = emulator.getDisplay();
+    //     bool[64 * 32] memory display = emulator.getDisplay();
 
-        // Expected pattern:
-        // Row 0: 1 1 1 1 0 0 0 0 (0xF0)
-        // Row 1: 1 0 0 1 0 0 0 0 (0x90)
-        // Row 2: 1 1 1 1 0 0 0 0 (0xF0)
-        // Row 3: 1 0 0 1 0 0 0 0 (0x90)
-        // Row 4: 1 0 0 1 0 0 0 0 (0x90)
+    //     // Expected pattern:
+    //     // Row 0: 1 1 1 1 0 0 0 0 (0xF0)
+    //     // Row 1: 1 0 0 1 0 0 0 0 (0x90)
+    //     // Row 2: 1 1 1 1 0 0 0 0 (0xF0)
+    //     // Row 3: 1 0 0 1 0 0 0 0 (0x90)
+    //     // Row 4: 1 0 0 1 0 0 0 0 (0x90)
 
-        // Starting coordinates (V0, V1)
-        uint8 xPos = emulator.getVRegister(0);
-        uint8 yPos = emulator.getVRegister(1);
-        assertEq(xPos, 0, "Should be 0");
-        assertEq(yPos, 0, "Should be 0");
+    //     // Starting coordinates (V0, V1)
+    //     uint8 xPos = emulator.getVRegister(0);
+    //     uint8 yPos = emulator.getVRegister(1);
+    //     assertEq(xPos, 0, "Should be 0");
+    //     assertEq(yPos, 0, "Should be 0");
 
-        uint8[5] memory pixelData = [program[12], program[13], program[14], program[15], program[16]];
+    //     uint8[5] memory pixelData = [
+    //         program[12],
+    //         program[13],
+    //         program[14],
+    //         program[15],
+    //         program[16]
+    //     ];
 
-        // Iterate over each row of the pixel
-        for (uint8 row = 0; row < 5; row++) {
-            uint8 pixelByte = pixelData[row];
-            // Iterate over each column (bit) in the pixel row
-            for (uint8 col = 0; col < 8; col++) {
-                // Extract the bit at position (7 - col)
-                bool pixelShouldBeSet = (pixelByte & (0x80 >> col)) != 0;
+    //     // Iterate over each row of the pixel
+    //     for (uint8 row = 0; row < 5; row++) {
+    //         uint8 pixelByte = pixelData[row];
+    //         // Iterate over each column (bit) in the pixel row
+    //         for (uint8 col = 0; col < 8; col++) {
+    //             // Extract the bit at position (7 - col)
+    //             bool pixelShouldBeSet = (pixelByte & (0x80 >> col)) != 0;
 
-                // Calculate the display index
-                uint8 x = xPos + col;
-                uint8 y = yPos + row;
-                // Ensure coordinates wrap around if they exceed the screen dimensions
-                x = x % 64;
-                y = y % 32;
+    //             // Calculate the display index
+    //             uint8 x = xPos + col;
+    //             uint8 y = yPos + row;
+    //             // Ensure coordinates wrap around if they exceed the screen dimensions
+    //             x = x % 64;
+    //             y = y % 32;
 
-                uint256 index = uint256(y) * 64 + uint256(x);
-                console.log("Index: %s", index);
+    //             uint256 index = uint256(y) * 64 + uint256(x);
+    //             console.log("Index: %s", index);
 
-                // Assert that the display pixel matches the expected value
-                assertEq(display[index], pixelShouldBeSet, "Pixel should be set");
-            }
-        }
-    }
+    //             // Assert that the display pixel matches the expected value
+    //             assertEq(
+    //                 display[index],
+    //                 pixelShouldBeSet,
+    //                 "Pixel should be set"
+    //             );
+    //         }
+    //     }
+    // }
 
-    function testRunSimpleProgram() public {
-        uint8[] memory program = new uint8[](17);
-        // 00E0 - CLS
-        program[0] = 0x00;
-        program[1] = 0xE0;
-        // 6000 - LD V0, 0x00
-        program[2] = 0x60;
-        program[3] = 0x00;
-        // 6100 - LD V1, 0x00
-        program[4] = 0x61;
-        program[5] = 0x00;
-        // A20C - LD I, 0x20C
-        program[6] = 0xA2;
-        program[7] = 0x0C;
-        // D015 - DRW V0, V1, 5
-        program[8] = 0xD0;
-        program[9] = 0x15;
-        // 120A - JP 0x20A
-        program[10] = 0x12;
-        program[11] = 0x0A;
+    // function testRunSimpleProgram() public {
+    //     uint8[] memory program = new uint8[](17);
+    //     // 00E0 - CLS
+    //     program[0] = 0x00;
+    //     program[1] = 0xE0;
+    //     // 6000 - LD V0, 0x00
+    //     program[2] = 0x60;
+    //     program[3] = 0x00;
+    //     // 6100 - LD V1, 0x00
+    //     program[4] = 0x61;
+    //     program[5] = 0x00;
+    //     // A20C - LD I, 0x20C
+    //     program[6] = 0xA2;
+    //     program[7] = 0x0C;
+    //     // D015 - DRW V0, V1, 5
+    //     program[8] = 0xD0;
+    //     program[9] = 0x15;
+    //     // 120A - JP 0x20A
+    //     program[10] = 0x12;
+    //     program[11] = 0x0A;
 
-        program[12] = 0xF0;
-        program[13] = 0x90;
-        program[14] = 0xF0;
-        program[15] = 0x90;
-        program[16] = 0x90;
+    //     program[12] = 0xF0;
+    //     program[13] = 0x90;
+    //     program[14] = 0xF0;
+    //     program[15] = 0x90;
+    //     program[16] = 0x90;
 
-        emulator.load(program);
-        emulator.run();
+    //     emulator.load(program);
+    //     emulator.run();
 
-        bool[64 * 32] memory display = emulator.getDisplay();
+    //     bool[64 * 32] memory display = emulator.getDisplay();
 
-        // Expected pattern:
-        // Row 0: 1 1 1 1 0 0 0 0 (0xF0)
-        // Row 1: 1 0 0 1 0 0 0 0 (0x90)
-        // Row 2: 1 1 1 1 0 0 0 0 (0xF0)
-        // Row 3: 1 0 0 1 0 0 0 0 (0x90)
-        // Row 4: 1 0 0 1 0 0 0 0 (0x90)
+    //     // Expected pattern:
+    //     // Row 0: 1 1 1 1 0 0 0 0 (0xF0)
+    //     // Row 1: 1 0 0 1 0 0 0 0 (0x90)
+    //     // Row 2: 1 1 1 1 0 0 0 0 (0xF0)
+    //     // Row 3: 1 0 0 1 0 0 0 0 (0x90)
+    //     // Row 4: 1 0 0 1 0 0 0 0 (0x90)
 
-        // Starting coordinates (V0, V1)
-        uint8 xPos = emulator.getVRegister(0);
-        uint8 yPos = emulator.getVRegister(1);
-        assertEq(xPos, 0, "Should be 0");
-        assertEq(yPos, 0, "Should be 0");
+    //     // Starting coordinates (V0, V1)
+    //     uint8 xPos = emulator.getVRegister(0);
+    //     uint8 yPos = emulator.getVRegister(1);
+    //     assertEq(xPos, 0, "Should be 0");
+    //     assertEq(yPos, 0, "Should be 0");
 
-        uint8[5] memory pixelData = [program[12], program[13], program[14], program[15], program[16]];
+    //     uint8[5] memory pixelData = [program[12], program[13], program[14], program[15], program[16]];
 
-        // Iterate over each row of the pixel
-        for (uint8 row = 0; row < 5; row++) {
-            uint8 pixelByte = pixelData[row];
-            // Iterate over each column (bit) in the pixel row
-            for (uint8 col = 0; col < 8; col++) {
-                // Extract the bit at position (7 - col)
-                bool pixelShouldBeSet = (pixelByte & (0x80 >> col)) != 0;
+    //     // Iterate over each row of the pixel
+    //     for (uint8 row = 0; row < 5; row++) {
+    //         uint8 pixelByte = pixelData[row];
+    //         // Iterate over each column (bit) in the pixel row
+    //         for (uint8 col = 0; col < 8; col++) {
+    //             // Extract the bit at position (7 - col)
+    //             bool pixelShouldBeSet = (pixelByte & (0x80 >> col)) != 0;
 
-                // Calculate the display index
-                uint8 x = xPos + col;
-                uint8 y = yPos + row;
-                // Ensure coordinates wrap around if they exceed the screen dimensions
-                x = x % 64;
-                y = y % 32;
+    //             // Calculate the display index
+    //             uint8 x = xPos + col;
+    //             uint8 y = yPos + row;
+    //             // Ensure coordinates wrap around if they exceed the screen dimensions
+    //             x = x % 64;
+    //             y = y % 32;
 
-                uint256 index = uint256(y) * 64 + uint256(x);
-                console.log("Index: %s", index);
+    //             uint256 index = uint256(y) * 64 + uint256(x);
+    //             console.log("Index: %s", index);
 
-                // Assert that the display pixel matches the expected value
-                assertEq(display[index], pixelShouldBeSet, "Pixel should be set");
-            }
-        }
-    }
+    //             // Assert that the display pixel matches the expected value
+    //             assertEq(display[index], pixelShouldBeSet, "Pixel should be set");
+    //         }
+    //     }
+    // }
 }

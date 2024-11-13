@@ -16,6 +16,7 @@ contract Emu {
 
     /// @notice size of RAM
     uint16 constant RAM_SIZE = 4096;
+    uint16 constant RAM_SIZE_32BYTES = 128;
     /// @notice number of registers
     uint8 constant NUM_REGS = 16;
     /// @notice number of stack entries
@@ -27,105 +28,13 @@ contract Emu {
     // Display
     // -------------------------------------------------------------------------
 
-    /// @notice fontset size
-    uint8 constant FONTSET_SIZE = 80;
-
-    /// @notice fontset
-    /// @dev Most modern emulators will use that space to store the sprite data for font characters of all the
-    /// hexadecimal digits, that is characters of 0-9 and A-F. We could store this data at any fixed position in RAM, but this
-    /// space is already defined as empty anyway. Each character is made up of eight rows of five pixels, with each row using
-    /// a byte of data, meaning that each letter altogether takes up five bytes of data. The following diagram illustrates how
-    /// a character is stored as bytes
-    uint8[FONTSET_SIZE] FONTSET = [
-        0xF0,
-        0x90,
-        0x90,
-        0x90,
-        0xF0, // 0
-        0x20,
-        0x60,
-        0x20,
-        0x20,
-        0x70, // 1
-        0xF0,
-        0x10,
-        0xF0,
-        0x80,
-        0xF0, // 2
-        0xF0,
-        0x10,
-        0xF0,
-        0x10,
-        0xF0, // 3
-        0x90,
-        0x90,
-        0xF0,
-        0x10,
-        0x10, // 4
-        0xF0,
-        0x80,
-        0xF0,
-        0x10,
-        0xF0, // 5
-        0xF0,
-        0x80,
-        0xF0,
-        0x90,
-        0xF0, // 6
-        0xF0,
-        0x10,
-        0x20,
-        0x40,
-        0x40, // 7
-        0xF0,
-        0x90,
-        0xF0,
-        0x90,
-        0xF0, // 8
-        0xF0,
-        0x90,
-        0xF0,
-        0x10,
-        0xF0, // 9
-        0xF0,
-        0x90,
-        0xF0,
-        0x90,
-        0x90, // A
-        0xE0,
-        0x90,
-        0xE0,
-        0x90,
-        0xE0, // B
-        0xF0,
-        0x80,
-        0x80,
-        0x80,
-        0xF0, // C
-        0xE0,
-        0x90,
-        0x90,
-        0x90,
-        0xE0, // D
-        0xF0,
-        0x80,
-        0xF0,
-        0x80,
-        0xF0, // E
-        0xF0,
-        0x80,
-        0xF0,
-        0x80,
-        0x80 // F
-    ];
-
     struct Emulator {
         /// @notice 16-bit program counter
         uint16 pc;
-        /// @notice 4KB RAM
-        uint8[RAM_SIZE] ram;
-        /// @notice A 64x32 monochrome display
-        bool[SCREEN_WIDTH * SCREEN_HEIGHT] screen;
+        /// @notice arbitrary-length raw byte data
+        bytes ram;
+        /// @notice A 64x32 monochrome display = 2048 bit = 256 * 8 bits
+        uint256[8] screen;
         /// @notice Sixteen 8-bit general purpose registers, referred to as V0 thru VF
         uint8[NUM_REGS] v_reg;
         /// @notice Single 16-bit register used as a pointer for memory access, called the I Register
@@ -155,16 +64,13 @@ contract Emu {
 
     constructor() {
         emu.pc = START_ADDR;
-        for (uint256 i = 0; i < FONTSET_SIZE; i++) {
-            emu.ram[i] = FONTSET[i];
-        }
     }
 
     /// @notice Reset the emulator
     function reset() public {
         emu.pc = START_ADDR;
-        for (uint256 i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
-            emu.screen[i] = false;
+        for (uint256 i = 0; i < SCREEN_HEIGHT; i++) {
+            emu.screen[i] = 0;
         }
         for (uint256 i = 0; i < NUM_REGS; i++) {
             emu.v_reg[i] = 0;
@@ -179,10 +85,6 @@ contract Emu {
         }
         emu.dt = 0;
         emu.st = 0;
-        // Copy FONTSET
-        for (uint256 i = 0; i < FONTSET_SIZE; i++) {
-            emu.ram[i] = FONTSET[i];
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -227,13 +129,11 @@ contract Emu {
     }
 
     /// @notice Fetch the next instruction
-    function fetch() public returns (uint16) {
-        require(emu.pc + 1 < RAM_SIZE, "Program counter out of bounds");
-        uint16 higher_byte = uint16(emu.ram[emu.pc]);
-        uint16 lower_byte = uint16(emu.ram[emu.pc + 1]);
-        uint16 op = (higher_byte << 8) | lower_byte;
-        emu.pc += 2;
-        return op;
+    function fetch() public view returns (uint16) {
+        require(emu.pc + 1 < emu.ram.length, "Program counter out of bounds");
+        uint16 value = (uint16(uint8(emu.ram[emu.pc])) << 8) |
+            uint16(uint8(emu.ram[emu.pc + 1]));
+        return value;
     }
 
     function run() public {
@@ -258,13 +158,15 @@ contract Emu {
 
         //  00E0 - CLS
         if (digit1 == 0x0 && digit2 == 0x0 && digit3 == 0xE && digit4 == 0) {
-            for (uint256 i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
-                emu.screen[i] = false;
+            for (uint256 i = 0; i < SCREEN_HEIGHT; i++) {
+                emu.screen[i] = 0;
             }
             return;
         }
         // 00EE - RET
-        else if (digit1 == 0x0 && digit2 == 0x0 && digit3 == 0xE && digit4 == 0xE) {
+        else if (
+            digit1 == 0x0 && digit2 == 0x0 && digit3 == 0xE && digit4 == 0xE
+        ) {
             emu.pc = pop();
             return;
         }
@@ -405,8 +307,17 @@ contract Emu {
             uint8 x = digit2;
             uint8 nn = uint8(op & 0x00FF);
             // Pseudo-random number generation (not secure)
-            uint8 rand =
-                uint8(uint256(keccak256(abi.encodePacked(block.timestamp, blockhash(block.number - 1), emu.pc))) % 256);
+            uint8 rand = uint8(
+                uint256(
+                    keccak256(
+                        abi.encodePacked(
+                            block.timestamp,
+                            blockhash(block.number - 1),
+                            emu.pc
+                        )
+                    )
+                ) % 256
+            );
             emu.v_reg[x] = rand & nn;
             return;
         }
@@ -415,22 +326,49 @@ contract Emu {
             uint8 x = emu.v_reg[digit2] % uint8(SCREEN_WIDTH);
             uint8 y = emu.v_reg[digit3] % uint8(SCREEN_HEIGHT);
             uint8 height = digit4;
-            emu.v_reg[0xF] = 0; // Reset VF
+            emu.v_reg[0xF] = 0; // Reset VF (collision flag)
 
             for (uint8 row = 0; row < height; row++) {
-                uint8 sprite_byte = emu.ram[emu.i_reg + row];
+                // Extract the byte from the uint256 word
+                uint8 sprite_byte = uint8(emu.ram[emu.i_reg + row]);
+
                 for (uint8 col = 0; col < 8; col++) {
+                    // Get the sprite pixel (bit) at the current column
                     uint8 sprite_pixel = (sprite_byte >> (7 - col)) & 0x1;
+
+                    // Calculate the screen coordinates, wrapping around if necessary
                     uint32 screen_x = uint32((x + col) % SCREEN_WIDTH);
                     uint32 screen_y = uint32((y + row) % SCREEN_HEIGHT);
-                    uint256 index = screen_y * SCREEN_WIDTH + screen_x;
 
-                    bool pixel_before = emu.screen[index];
+                    // Calculate the index in the display buffer
+                    uint32 pixel_index = screen_y * SCREEN_WIDTH + screen_x; // Range: 0 to 2047
+
+                    // Calculate the display array index and bit position
+                    uint256 display_index = pixel_index / 256; // Index in emu.screen[]
+                    uint256 bit_position = pixel_index % 256; // Bit position within emu.screen[display_index]
+
+                    // Get the current pixel value from the display
+                    bool pixel_before = ((emu.screen[display_index] >>
+                        (255 - bit_position)) & 0x1) != 0;
+
+                    // Calculate the new pixel value using XOR (as per CHIP-8 drawing behavior)
                     bool new_pixel = pixel_before != (sprite_pixel == 1);
+
+                    // Update the collision flag VF if a pixel is erased
                     if (pixel_before && !new_pixel) {
                         emu.v_reg[0xF] = 1;
                     }
-                    emu.screen[index] = new_pixel;
+
+                    // Update the display with the new pixel value
+                    if (new_pixel) {
+                        // Set the bit to 1
+                        emu.screen[display_index] |= (1 <<
+                            (255 - bit_position));
+                    } else {
+                        // Set the bit to 0
+                        emu.screen[display_index] &= ~(1 <<
+                            (255 - bit_position));
+                    }
                 }
             }
             return;
@@ -507,16 +445,16 @@ contract Emu {
         else if (digit1 == 0xF && digit3 == 0x3 && digit4 == 0x3) {
             uint8 x = digit2;
             uint8 value = emu.v_reg[x];
-            emu.ram[emu.i_reg] = value / 100;
-            emu.ram[emu.i_reg + 1] = (value / 10) % 10;
-            emu.ram[emu.i_reg + 2] = value % 10;
+            emu.ram[emu.i_reg] = bytes1(value / 100);
+            emu.ram[emu.i_reg + 1] = bytes1((value / 10) % 10);
+            emu.ram[emu.i_reg + 2] = bytes1(value % 10);
             return;
         }
         // FX55 - Store V0 to VX in memory starting at address I
         else if (digit1 == 0xF && digit3 == 0x5 && digit4 == 0x5) {
             uint8 x = digit2;
             for (uint8 i = 0; i <= x; i++) {
-                emu.ram[emu.i_reg + i] = emu.v_reg[i];
+                emu.ram[emu.i_reg + i] = bytes1(emu.v_reg[i]);
             }
             return;
         }
@@ -524,7 +462,10 @@ contract Emu {
         else if (digit1 == 0xF && digit3 == 0x6 && digit4 == 0x5) {
             uint8 x = digit2;
             for (uint8 i = 0; i <= x; i++) {
-                emu.v_reg[i] = emu.ram[emu.i_reg + i];
+                emu.v_reg[i] = uint8(
+                    (emu.ram[(emu.i_reg + i) / 32] >>
+                        ((31 - ((emu.i_reg + i) % 32)) * 8)) & 0xFF
+                );
             }
             return;
         } else {
@@ -537,7 +478,7 @@ contract Emu {
     // -------------------------------------------------------------------------
 
     /// @notice Get display
-    function getDisplay() public view returns (bool[SCREEN_WIDTH * SCREEN_HEIGHT] memory) {
+    function getDisplay() public view returns (uint256[8] memory) {
         return emu.screen;
     }
 
@@ -553,7 +494,7 @@ contract Emu {
         uint256 end = START_ADDR + data.length;
         require(end <= RAM_SIZE, "Data too large to fit in RAM");
         for (uint256 i = start; i < end; i++) {
-            emu.ram[i] = data[i - start];
+            emu.ram[i] = bytes1(data[i - start]);
         }
         emu.program_size = data.length;
     }
@@ -566,9 +507,9 @@ contract Emu {
         return emu.pc;
     }
 
-    function getRAMValueAt(uint256 index) public view returns (uint8) {
+    function getRAMValueAt(uint16 index) public view returns (uint8) {
         require(index < RAM_SIZE, "RAM index out of bounds");
-        return emu.ram[index];
+        return uint8((emu.ram[index / 32] >> ((31 - (index % 32)) * 8)) & 0xFF);
     }
 
     function getVRegister(uint256 index) public view returns (uint8) {
@@ -591,7 +532,7 @@ contract Emu {
 
     function setRAMValueAt(uint256 index, uint8 value) public {
         require(index < RAM_SIZE, "RAM index out of bounds");
-        emu.ram[index] = value;
+        emu.ram[index] = bytes1(value);
     }
 
     function getDelayTimer() public view returns (uint8) {
@@ -630,12 +571,20 @@ contract Emu {
 
     function setScreenPixel(uint256 index, bool value) public {
         require(index < SCREEN_WIDTH * SCREEN_HEIGHT, "Index out of bounds");
-        emu.screen[index] = value;
+        uint256 mask = uint256(1) << (255 - (index % 256));
+
+        if (value) {
+            // Set the bit to 1
+            emu.screen[index / 256] |= mask;
+        } else {
+            // Set the bit to 0
+            emu.screen[index / 256] &= ~mask;
+        }
     }
 
     function isDisplayCleared() public view returns (bool) {
-        for (uint256 i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
-            if (emu.screen[i]) {
+        for (uint256 i = 0; i < 8; i++) {
+            if (emu.screen[i] != 0) {
                 return false;
             }
         }
