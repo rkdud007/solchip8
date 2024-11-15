@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+bitvec = "1.0.1"
 sdl2 = "^0.34.3"
 alloy = { version = "=0.5.4", features = [
     "full",
