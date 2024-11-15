@@ -27,98 +27,6 @@ contract Emu {
     // Display
     // -------------------------------------------------------------------------
 
-    /// @notice fontset size
-    uint8 constant FONTSET_SIZE = 80;
-
-    /// @notice fontset
-    /// @dev Most modern emulators will use that space to store the sprite data for font characters of all the
-    /// hexadecimal digits, that is characters of 0-9 and A-F. We could store this data at any fixed position in RAM, but this
-    /// space is already defined as empty anyway. Each character is made up of eight rows of five pixels, with each row using
-    /// a byte of data, meaning that each letter altogether takes up five bytes of data. The following diagram illustrates how
-    /// a character is stored as bytes
-    uint8[FONTSET_SIZE] FONTSET = [
-        0xF0,
-        0x90,
-        0x90,
-        0x90,
-        0xF0, // 0
-        0x20,
-        0x60,
-        0x20,
-        0x20,
-        0x70, // 1
-        0xF0,
-        0x10,
-        0xF0,
-        0x80,
-        0xF0, // 2
-        0xF0,
-        0x10,
-        0xF0,
-        0x10,
-        0xF0, // 3
-        0x90,
-        0x90,
-        0xF0,
-        0x10,
-        0x10, // 4
-        0xF0,
-        0x80,
-        0xF0,
-        0x10,
-        0xF0, // 5
-        0xF0,
-        0x80,
-        0xF0,
-        0x90,
-        0xF0, // 6
-        0xF0,
-        0x10,
-        0x20,
-        0x40,
-        0x40, // 7
-        0xF0,
-        0x90,
-        0xF0,
-        0x90,
-        0xF0, // 8
-        0xF0,
-        0x90,
-        0xF0,
-        0x10,
-        0xF0, // 9
-        0xF0,
-        0x90,
-        0xF0,
-        0x90,
-        0x90, // A
-        0xE0,
-        0x90,
-        0xE0,
-        0x90,
-        0xE0, // B
-        0xF0,
-        0x80,
-        0x80,
-        0x80,
-        0xF0, // C
-        0xE0,
-        0x90,
-        0x90,
-        0x90,
-        0xE0, // D
-        0xF0,
-        0x80,
-        0xF0,
-        0x80,
-        0xF0, // E
-        0xF0,
-        0x80,
-        0xF0,
-        0x80,
-        0x80 // F
-    ];
-
     struct Emulator {
         /// @notice 16-bit program counter
         uint16 pc;
@@ -155,9 +63,6 @@ contract Emu {
 
     constructor() {
         emu.pc = START_ADDR;
-        for (uint256 i = 0; i < FONTSET_SIZE; i++) {
-            emu.ram[i] = FONTSET[i];
-        }
     }
 
     /// @notice Reset the emulator
@@ -179,10 +84,6 @@ contract Emu {
         }
         emu.dt = 0;
         emu.st = 0;
-        // Copy FONTSET
-        for (uint256 i = 0; i < FONTSET_SIZE; i++) {
-            emu.ram[i] = FONTSET[i];
-        }
     }
 
     // -------------------------------------------------------------------------
