@@ -1,41 +1,75 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
-/// @title Chip8 emulator
+/// @title Solchip8 - The first 100% on-chain CHIP-8 emulator
 /// @author @rkdud007
-/// @notice Emulates a Chip8 as a Solidity smart contract
-contract Emu {
+/// @notice A standard CHIP-8 emulator supporting a 64x32 monochrome display, sixteen 8-bit general-purpose registers, and 4096 bytes of RAM.
+/// @dev This contract is optimized for CHIP-8 emulation within the EVM environment.
+
+/**
+ * ====================================== Display Representation ======================================
+ * The display has a width of 64 pixels and a height of 32 pixels, totaling 2048 pixels.
+ * Each pixel is either black (0) or white (1). To optimize storage, each pixel is represented as a bit.
+ * Using EVM's base unit of bytes32, we compress the display into a `uint256[8]` array:
+ *
+ * Example:
+ *       |-----8 bits (1 byte) * 32 = bytes32-----|
+ *       00000000 00000000 ..... 00000000 00000000 -|
+ *       00000000 00000000 ..... 00000000 00000000  |
+ *       ...                                        8 rows
+ *       00000000 00000000 ..... 00000000 00000000  |
+ *       00000000 00000000 ..... 00000000 00000000 -|
+ *
+ * This representation efficiently stores all 2048 pixels within a `uint256[8]` array.
+ *
+ * ====================================== Keyboard Representation =====================================
+ * The keyboard supports 16 keys, with indices ranging from 0x0 to 0xF.
+ * Each key state is either pressed (1) or not pressed (0), represented as a `uint16` bitfield.
+ *
+ * Keyboard Layout:
+ *     Keyboard                    CHIP-8
+ *     +---+---+---+---+           +---+---+---+---+
+ *     | 1 | 2 | 3 | 4 |           | 1 | 2 | 3 | C |
+ *     +---+---+---+---+           +---+---+---+---+
+ *     | Q | W | E | R |           | 4 | 5 | 6 | D |
+ *     +---+---+---+---+    =>     +---+---+---+---+
+ *     | A | S | D | F |           | 7 | 8 | 9 | E |
+ *     +---+---+---+---+           +---+---+---+---+
+ *     | Z | X | C | V |           | A | 0 | B | F |
+ *     +---+---+---+---+           +---+---+---+---+
+ *
+ * Example:
+ *     Pressing the `Q` key results in:
+ *     00010000 00000000 (binary representation of the `uint16` keys field).
+ */
+contract Solchip8 {
     // -------------------------------------------------------------------------
     // Constants
     // -------------------------------------------------------------------------
 
-    /// @notice screen width 64 pixels
+    /// @notice Screen width in pixels.
     uint16 constant SCREEN_WIDTH = 64;
-    /// @notice screen height 32 pixels
+    /// @notice Screen height in pixels.
     uint16 constant SCREEN_HEIGHT = 32;
 
-    /// @notice size of RAM
+    /// @notice Size of RAM in bytes.
     uint16 constant RAM_SIZE = 4096;
-    /// @notice number of registers
+    /// @notice Number of general-purpose registers.
     uint8 constant NUM_REGS = 16;
-    /// @notice number of stack entries
+    /// @notice Number of stack entries.
     uint8 constant STACK_SIZE = 16;
-    /// @notice number of keys
+    /// @notice Number of keys on the CHIP-8 keyboard.
     uint8 constant NUM_KEYS = 16;
 
     // -------------------------------------------------------------------------
     // Display
     // -------------------------------------------------------------------------
 
-    /// @notice fontset size
+    /// @notice Size of the font set.
     uint8 constant FONTSET_SIZE = 80;
 
-    /// @notice fontset
-    /// @dev Most modern emulators will use that space to store the sprite data for font characters of all the
-    /// hexadecimal digits, that is characters of 0-9 and A-F. We could store this data at any fixed position in RAM, but this
-    /// space is already defined as empty anyway. Each character is made up of eight rows of five pixels, with each row using
-    /// a byte of data, meaning that each letter altogether takes up five bytes of data. The following diagram illustrates how
-    /// a character is stored as bytes
+    /// @notice Font set containing the sprite data for hexadecimal digits (0-9 and A-F).
+    /// @dev Each character sprite consists of 5 bytes, representing an 8x5 monochrome grid.
     uint8[FONTSET_SIZE] FONTSET = [
         0xF0,
         0x90,
@@ -120,39 +154,41 @@ contract Emu {
     ];
 
     struct Emulator {
-        /// @notice 16-bit program counter
+        /// @notice 16-bit program counter.
         uint16 pc;
-        /// @notice 4KB RAM
+        /// @notice 4KB of RAM.
         uint8[RAM_SIZE] ram;
-        /// @notice A 64x32 monochrome display
-        bool[SCREEN_WIDTH * SCREEN_HEIGHT] screen;
-        /// @notice Sixteen 8-bit general purpose registers, referred to as V0 thru VF
+        /// @notice Display as a bitfield (8 rows of 256 bits each).
+        uint256[8] screen;
+        /// @notice Sixteen 8-bit general-purpose registers (V0 to VF).
         uint8[NUM_REGS] v_reg;
-        /// @notice Single 16-bit register used as a pointer for memory access, called the I Register
+        /// @notice A 16-bit register for memory access (I register).
         uint16 i_reg;
-        /// @notice Stack pointer
+        /// @notice Stack pointer.
         uint16 sp;
-        /// @notice 16-bit stack used for calling and returning from subroutines
+        /// @notice Stack for subroutine calls.
         uint16[STACK_SIZE] stack;
-        /// @notice 16-key keyboard input
-        bool[NUM_KEYS] keys;
-        /// @notice Delay timer
+        /// @notice Keyboard state as a 16-bit bitfield.
+        uint16 keys;
+        /// @notice Delay timer.
         uint8 dt;
-        /// @notice Sound timer
+        /// @notice Sound timer.
         uint8 st;
-        /// @notice Program size
+        /// @notice Size of the loaded program.
         uint256 program_size;
     }
 
+    /// @dev Instance of the CHIP-8 emulator.
     Emulator emu;
 
     // -------------------------------------------------------------------------
     // Initialization
     // -------------------------------------------------------------------------
 
-    /// @notice start address for program (usually 0x200)
+    /// @notice The starting address for programs (typically 0x200).
     uint16 constant START_ADDR = 0x200;
 
+    /// @notice Constructor that initializes the emulator with the font set.
     constructor() {
         emu.pc = START_ADDR;
         for (uint256 i = 0; i < FONTSET_SIZE; i++) {
@@ -160,11 +196,11 @@ contract Emu {
         }
     }
 
-    /// @notice Reset the emulator
+    /// @notice Resets the emulator to its initial state.
     function reset() public {
         emu.pc = START_ADDR;
-        for (uint256 i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
-            emu.screen[i] = false;
+        for (uint256 i = 0; i < 8; i++) {
+            emu.screen[i] = 0;
         }
         for (uint256 i = 0; i < NUM_REGS; i++) {
             emu.v_reg[i] = 0;
@@ -174,12 +210,11 @@ contract Emu {
         for (uint256 i = 0; i < STACK_SIZE; i++) {
             emu.stack[i] = 0;
         }
-        for (uint256 i = 0; i < NUM_KEYS; i++) {
-            emu.keys[i] = false;
-        }
+        emu.keys = 0;
         emu.dt = 0;
         emu.st = 0;
-        // Copy FONTSET
+
+        // Reload font set into RAM
         for (uint256 i = 0; i < FONTSET_SIZE; i++) {
             emu.ram[i] = FONTSET[i];
         }
@@ -211,9 +246,11 @@ contract Emu {
         uint16 op = fetch();
         // Decode & execute
         execute(op);
+
+        _tickTimers();
     }
 
-    function tickTimers() public {
+    function _tickTimers() internal {
         if (emu.dt > 0) {
             emu.dt -= 1;
         }
@@ -258,8 +295,8 @@ contract Emu {
 
         //  00E0 - CLS
         if (digit1 == 0x0 && digit2 == 0x0 && digit3 == 0xE && digit4 == 0) {
-            for (uint256 i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
-                emu.screen[i] = false;
+            for (uint256 i = 0; i < 8; i++) {
+                emu.screen[i] = 0;
             }
             return;
         }
@@ -313,7 +350,9 @@ contract Emu {
         //  7NNN - VX += NN
         else if (digit1 == 0x7) {
             uint8 nn = uint8(op & 0xFF);
-            emu.v_reg[digit2] += nn;
+            unchecked {
+                emu.v_reg[digit2] += nn;
+            }
             return;
         }
         // 8XY0 - VX = VY
@@ -420,17 +459,37 @@ contract Emu {
             for (uint8 row = 0; row < height; row++) {
                 uint8 sprite_byte = emu.ram[emu.i_reg + row];
                 for (uint8 col = 0; col < 8; col++) {
+                    // Get the sprite pixel (bit) at the current column
                     uint8 sprite_pixel = (sprite_byte >> (7 - col)) & 0x1;
                     uint32 screen_x = uint32((x + col) % SCREEN_WIDTH);
                     uint32 screen_y = uint32((y + row) % SCREEN_HEIGHT);
-                    uint256 index = screen_y * SCREEN_WIDTH + screen_x;
 
-                    bool pixel_before = emu.screen[index];
+                    // Calculate the index in the display buffer
+                    uint32 pixel_index = screen_y * SCREEN_WIDTH + screen_x; // Range: 0 to 2047
+
+                    // Calculate the display array index and bit position
+                    uint256 display_index = pixel_index / 256; // Index in emu.screen[]
+                    uint256 bit_position = pixel_index % 256; // Bit position within emu.screen[display_index]
+
+                    // Get the current pixel value from the display
+                    bool pixel_before = ((emu.screen[display_index] >> (255 - bit_position)) & 0x1) != 0;
+
+                    // Calculate the new pixel value using XOR (as per CHIP-8 drawing behavior)
                     bool new_pixel = pixel_before != (sprite_pixel == 1);
+
+                    // Update the collision flag VF if a pixel is erased
                     if (pixel_before && !new_pixel) {
                         emu.v_reg[0xF] = 1;
                     }
-                    emu.screen[index] = new_pixel;
+
+                    // Update the display with the new pixel value
+                    if (new_pixel) {
+                        // Set the bit to 1
+                        emu.screen[display_index] |= (1 << (255 - bit_position));
+                    } else {
+                        // Set the bit to 0
+                        emu.screen[display_index] &= ~(1 << (255 - bit_position));
+                    }
                 }
             }
             return;
@@ -440,7 +499,7 @@ contract Emu {
             uint8 x = digit2;
             uint8 key = emu.v_reg[x];
             require(key < NUM_KEYS, "Invalid key");
-            if (emu.keys[key]) {
+            if ((emu.keys & (1 << key)) != 0) {
                 emu.pc += 2;
             }
             return;
@@ -450,7 +509,7 @@ contract Emu {
             uint8 x = digit2;
             uint8 key = emu.v_reg[x];
             require(key < NUM_KEYS, "Invalid key");
-            if (!emu.keys[key]) {
+            if ((emu.keys & (1 << key)) == 0) {
                 emu.pc += 2;
             }
             return;
@@ -466,7 +525,7 @@ contract Emu {
             uint8 x = digit2;
             bool key_pressed = false;
             for (uint8 i = 0; i < NUM_KEYS; i++) {
-                if (emu.keys[i]) {
+                if ((emu.keys & (1 << i)) != 0) {
                     emu.v_reg[x] = i;
                     key_pressed = true;
                     break;
@@ -537,14 +596,23 @@ contract Emu {
     // -------------------------------------------------------------------------
 
     /// @notice Get display
-    function getDisplay() public view returns (bool[SCREEN_WIDTH * SCREEN_HEIGHT] memory) {
+    function getDisplay() public view returns (uint256[8] memory) {
         return emu.screen;
     }
 
     /// @notice Handle keypress event
+    /// @param idx Index of the key (0-15)
+    /// @param pressed Whether the key is pressed (true) or released (false)
     function keypress(uint256 idx, bool pressed) public {
-        require(idx < NUM_KEYS, "Invalid key index");
-        emu.keys[idx] = pressed;
+        require(idx < 16, "Invalid key index");
+
+        if (pressed) {
+            // Set the bit at position `idx` to 1
+            emu.keys |= uint16(1 << idx);
+        } else {
+            // Clear the bit at position `idx` to 0
+            emu.keys &= ~uint16(1 << idx);
+        }
     }
 
     /// @notice Load program into memory
@@ -564,6 +632,10 @@ contract Emu {
 
     function getPC() public view returns (uint16) {
         return emu.pc;
+    }
+
+    function getKeys() public view returns (uint16) {
+        return emu.keys;
     }
 
     function getRAMValueAt(uint256 index) public view returns (uint8) {
@@ -629,16 +701,22 @@ contract Emu {
     }
 
     function setScreenPixel(uint256 index, bool value) public {
-        require(index < SCREEN_WIDTH * SCREEN_HEIGHT, "Index out of bounds");
-        emu.screen[index] = value;
+        unchecked {
+            require(index < SCREEN_WIDTH * SCREEN_HEIGHT, "Index out of bounds");
+            if (value) {
+                // Set the bit to 1
+                emu.screen[index >> 8] |= 1 << (index & 255);
+            } else {
+                // Set the bit to 0
+                emu.screen[index >> 8] &= ~(1 << (index & 255));
+            }
+        }
     }
 
     function isDisplayCleared() public view returns (bool) {
-        for (uint256 i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
-            if (emu.screen[i]) {
-                return false;
-            }
-        }
-        return true;
+        return (
+            emu.screen[0] == 0 && emu.screen[1] == 0 && emu.screen[2] == 0 && emu.screen[3] == 0 && emu.screen[4] == 0
+                && emu.screen[5] == 0 && emu.screen[6] == 0 && emu.screen[7] == 0
+        );
     }
 }

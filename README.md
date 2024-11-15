@@ -1,8 +1,21 @@
 # SolChip8
 
-[Chip8](https://en.wikipedia.org/wiki/CHIP-8) Emulator written in Solidity.
+`SolChip8` is the first 100% on-chain [Chip8](https://en.wikipedia.org/wiki/CHIP-8) emulator smart contract where you can run chip8 games on EVM environment. CHIP-8 is an interpreted programming language, initially used on the 8-bit microcomputers made in the mid-1970s.
 
-Got helped alot from [An Introduction to Chip-8 Emulation using the Rust Programming Language](https://aquova.net/chip8/chip8.pdf).
+[![Video Label](http://img.youtube.com/vi/e5J1xQcg4wU/0.jpg)](https://youtu.be/e5J1xQcg4wU?t=0s)
+
+
+### Installation
+
+```
+forge install rkdud007/solchip8
+```
+
+### Deployment 
+| Chain | Contract Address |
+|-------|-----------------|
+| Ethereum  Sepolia | [0x6Cf84915E775d47e685D84359526878b38170809](https://sepolia.etherscan.io/address/0x6cf84915e775d47e685d84359526878b38170809) |
+
 
 ### Features
 
@@ -10,11 +23,13 @@ Got helped alot from [An Introduction to Chip-8 Emulation using the Rust Program
 - Sixteen 8-bit general purpose registers
 - 4096 bytes of RAM
 - Example [ROM games](./c8games/) from [Chip-8 Games Pack](https://www.zophar.net/pdroms/chip8/chip-8-games-pack.html)
-- Demo [![Video Label](http://img.youtube.com/vi/4cni9DNQ0wA/0.jpg)](https://youtu.be/4cni9DNQ0wA?t=0s)
+- Run demo with [desktop](./desktop/)
+
+
 
 ### **Supported CHIP-8 Opcodes**
 
-Fully tested on [here](./test/Emu.t.sol)
+Tested [here](./test/Emu.t.sol)
 
 | Opcode | Mnemonic          | Description                                                         |
 | ------ | ----------------- | ------------------------------------------------------------------- |
@@ -57,3 +72,4 @@ Fully tested on [here](./test/Emu.t.sol)
 ### Resources
 
 - [chip8](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#8xy3)
+- [An Introduction to Chip-8 Emulation using the Rust Programming Language](https://aquova.net/chip8/chip8.pdf)
