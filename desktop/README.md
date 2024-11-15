@@ -9,7 +9,7 @@ export LIBRARY_PATH="$LIBRARY_PATH:/opt/homebrew/lib"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/homebrew/lib"
 export DYLD_LIBRARY_PATH="$DYLD_LIBRARY_PATH:/opt/homebrew/lib"
 
-cargo run -r
+cargo run [path of ROM file]
 ```
 
 anvil

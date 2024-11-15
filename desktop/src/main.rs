@@ -821,23 +821,9 @@ async fn main() {
         // TODO: I want to have tick per frame
         // for _ in 0..TICKS_PER_FRAME {}
         let builder = chip8.tick();
-        let _ =  builder.call().await;
-       
-        let tx = builder.send().await;
-        match tx {
-            Ok(x) => {
-                 println!("tx:{:?}", x);
-            },
-            Err(_) => {
-                std::thread::sleep(std::time::Duration::from_millis(250));
-                //try one more time
-                let builder = chip8.tick();
-              let _ =  builder.call().await;
-               
-                let tx = builder.send().await;
-                 println!("tx:{:?}", tx);
-            },
-        }
+        builder.call().await.unwrap();
+        let tx = builder.send().await.unwrap();
+        println!("tx for tick:{:?}", tx);
  
 
         let pc = chip8.getPC().call().await.unwrap();
