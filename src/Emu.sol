@@ -588,6 +588,10 @@ contract Emu {
         return emu.pc;
     }
 
+    function getKeys() public view returns (bool[16] memory) {
+        return emu.keys;
+    }
+
     function getRAMValueAt(uint256 index) public view returns (uint8) {
         require(index < RAM_SIZE, "RAM index out of bounds");
         return emu.ram[index];
