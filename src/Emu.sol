@@ -211,9 +211,11 @@ contract Emu {
         uint16 op = fetch();
         // Decode & execute
         execute(op);
+
+        _tickTimers();
     }
 
-    function tickTimers() public {
+    function _tickTimers() internal {
         if (emu.dt > 0) {
             emu.dt -= 1;
         }
