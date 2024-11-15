@@ -2,8 +2,7 @@
 
 `SolChip8` is the first 100% on-chain [Chip8](https://en.wikipedia.org/wiki/CHIP-8) emulator smart contract where you can run chip8 games on EVM environment. CHIP-8 is an interpreted programming language, initially used on the 8-bit microcomputers made in the mid-1970s.
 
-[![Video Label](http://img.youtube.com/vi/e5J1xQcg4wU/0.jpg)](https://youtu.be/e5J1xQcg4wU?t=0s)
-
+![SolChip](./.github/solchip.gif)
 
 ### Installation
 
