@@ -11,14 +11,59 @@ forge install rkdud007/solchip8
 ```
 
 ### Deployment 
-| Chain | Contract Address |
-|-------|-----------------|
-| Ethereum  Sepolia | [0x6Cf84915E775d47e685D84359526878b38170809](https://sepolia.etherscan.io/address/0x6cf84915e775d47e685d84359526878b38170809) |
-| Base testnet | [0xEe22f06282174E7cbf7e7b864F5bF8E0b8eDDD62](https://sepolia.basescan.org/address/0xEe22f06282174E7cbf7e7b864F5bF8E0b8eDDD62) |
-| Base mainnet | [0xEe22f06282174E7cbf7e7b864F5bF8E0b8eDDD62](https://basescan.org/address/0xEe22f06282174E7cbf7e7b864F5bF8E0b8eDDD62) |
-| Arbitrum testnet | [0x161b2DdC9C3F0621b4B9Df1Af3F5E7602a058982](https://sepolia.arbiscan.io/address/0x161b2ddc9c3f0621b4b9df1af3f5e7602a058982) |
-| Obtimism testnet | [0xEe22f06282174E7cbf7e7b864F5bF8E0b8eDDD62](https://sepolia-optimism.etherscan.io/address/0xee22f06282174e7cbf7e7b864f5bf8e0b8eddd62) |
-| Odyssey testnet | [0x7459455BDDC9f5F53af76eFe857B2064b230E4fe](https://odyssey-explorer.ithaca.xyz/address/0x7459455bddc9f5f53af76efe857b2064b230e4fe) |
+
+- unified contract address start with `0xc8c8c8c8` to represent chip8 by using CREATE2 contract using [`create2deploy` cli tool](https://github.com/rkdud007/create2deploy)
+
+```console
+❯ cast create2 \
+    --deployer 0x0000000000FFe8B47B3e2130213B802212439497 \
+    --caller 0x0000000000000000000000000000000000000000 \
+    --init-code-hash 614b9ac9323beeaffd9de369597fc476014aee6e350489c0601b5f47b1146334 \
+    --starts-with c8c8c8c8
+```
+
+<table>
+    <thead>
+        <tr>
+            <th>Chain</th>
+            <th>Chain ID</th>
+            <th>Contract</th>
+            <th>v0.0.1</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan="1">Base mainnet</td>
+            <td rowspan="1">8453</td>
+            <td><code><a href="https://github.com/rkdud007/solchip8/blob/3382502e44f840b2d974570b93913e18f761cc0e/src/Solchip8.sol">Solchip8</a></code></td>
+            <td><code><a href="https://base.blockscout.com/address/0xc8c8c8c8421e85597881ae753d040449e81e528a">0xc8c8c8c8421e85597881ae753d040449e81e528a</code></td>
+        </tr>
+        <tr>
+            <td rowspan="1">Base sepolia</td>
+            <td rowspan="1">84532</td>
+            <td><code><a href="https://github.com/rkdud007/solchip8/blob/3382502e44f840b2d974570b93913e18f761cc0e/src/Solchip8.sol">Solchip8</a></code></td>
+            <td><code><a href="https://sepolia-explorer.base.org/address/0xc8c8c8c8421e85597881ae753d040449e81e528a">0xc8c8c8c8421e85597881ae753d040449e81e528a</code></td>
+        </tr>
+         <tr>
+            <td rowspan="1">Arbitrum sepolia</td>
+            <td rowspan="1">421614</td>
+            <td><code><a href="https://github.com/rkdud007/solchip8/blob/3382502e44f840b2d974570b93913e18f761cc0e/src/Solchip8.sol">Solchip8</a></code></td>
+            <td><code><a href="https://sepolia.arbiscan.io/address/0xc8c8c8c8421e85597881ae753d040449e81e528a">0xc8c8c8c8421e85597881ae753d040449e81e528a</code></td>
+        </tr>
+         <tr>
+            <td rowspan="1">Optimism sepolia</td>
+            <td rowspan="1">11155420</td>
+            <td><code><a href="https://github.com/rkdud007/solchip8/blob/3382502e44f840b2d974570b93913e18f761cc0e/src/Solchip8.sol">Solchip8</a></code></td>
+            <td><code><a href="https://sepolia-optimism.etherscan.io/address/0xc8c8c8c8421e85597881ae753d040449e81e528a">0xc8c8c8c8421e85597881ae753d040449e81e528a</code></td>
+        </tr>
+        <tr>
+            <td rowspan="1">Odyssey testnet</td>
+            <td rowspan="1">911867</td>
+            <td><code><a href="https://github.com/rkdud007/solchip8/blob/3382502e44f840b2d974570b93913e18f761cc0e/src/Solchip8.sol">Solchip8</a></code></td>
+            <td><code><a href="https://odyssey-explorer.ithaca.xyz/address/0x7459455bddc9f5f53af76efe857b2064b230e4fe">0x7459455bddc9f5f53af76efe857b2064b230e4fe</code></td>
+        </tr>
+    </tbody>
+<table>
 
 
 ### Features
@@ -30,10 +75,9 @@ forge install rkdud007/solchip8
 - Run demo with [desktop](./desktop/)
 
 
-
 ### **Supported CHIP-8 Opcodes**
 
-Tested [here](./test/Emu.t.sol)
+Tested [here](./test/Solchip8.t.sol)
 
 | Opcode | Mnemonic          | Description                                                         |
 | ------ | ----------------- | ------------------------------------------------------------------- |
