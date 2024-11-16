@@ -39,16 +39,22 @@ forge install rkdud007/solchip8
             <td><code><a href="https://base.blockscout.com/address/0xc8c8c8c8421e85597881ae753d040449e81e528a">0xc8c8c8c8421e85597881ae753d040449e81e528a</code></td>
         </tr>
         <tr>
-            <td rowspan="1">Base sepolia</td>
-            <td rowspan="1">84532</td>
+            <td rowspan="1">Ethereum sepolia</td>
+            <td rowspan="1">11155111</td>
             <td><code><a href="https://github.com/rkdud007/solchip8/blob/3382502e44f840b2d974570b93913e18f761cc0e/src/Solchip8.sol">Solchip8</a></code></td>
-            <td><code><a href="https://sepolia-explorer.base.org/address/0xc8c8c8c8421e85597881ae753d040449e81e528a">0xc8c8c8c8421e85597881ae753d040449e81e528a</code></td>
+            <td><code><a href="https://sepolia.etherscan.io/address/0xc8c8c8c8421e85597881ae753d040449e81e528a">0xc8c8c8c8421e85597881ae753d040449e81e528a</code></td>
         </tr>
          <tr>
             <td rowspan="1">Arbitrum sepolia</td>
             <td rowspan="1">421614</td>
             <td><code><a href="https://github.com/rkdud007/solchip8/blob/3382502e44f840b2d974570b93913e18f761cc0e/src/Solchip8.sol">Solchip8</a></code></td>
             <td><code><a href="https://sepolia.arbiscan.io/address/0xc8c8c8c8421e85597881ae753d040449e81e528a">0xc8c8c8c8421e85597881ae753d040449e81e528a</code></td>
+        </tr>
+        <tr>
+            <td rowspan="1">Base sepolia</td>
+            <td rowspan="1">84532</td>
+            <td><code><a href="https://github.com/rkdud007/solchip8/blob/3382502e44f840b2d974570b93913e18f761cc0e/src/Solchip8.sol">Solchip8</a></code></td>
+            <td><code><a href="https://sepolia-explorer.base.org/address/0xc8c8c8c8421e85597881ae753d040449e81e528a">0xc8c8c8c8421e85597881ae753d040449e81e528a</code></td>
         </tr>
          <tr>
             <td rowspan="1">Optimism sepolia</td>
