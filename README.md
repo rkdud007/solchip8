@@ -15,6 +15,7 @@ forge install rkdud007/solchip8
 |-------|-----------------|
 | Ethereum  Sepolia | [0x6Cf84915E775d47e685D84359526878b38170809](https://sepolia.etherscan.io/address/0x6cf84915e775d47e685d84359526878b38170809) |
 | Base testnet | [0xEe22f06282174E7cbf7e7b864F5bF8E0b8eDDD62](https://sepolia.basescan.org/address/0xEe22f06282174E7cbf7e7b864F5bF8E0b8eDDD62) |
+| Base mainnet | [0xEe22f06282174E7cbf7e7b864F5bF8E0b8eDDD62](https://basescan.org/address/0xEe22f06282174E7cbf7e7b864F5bF8E0b8eDDD62) |
 | Arbitrum testnet | [0x161b2DdC9C3F0621b4B9Df1Af3F5E7602a058982](https://sepolia.arbiscan.io/address/0x161b2ddc9c3f0621b4b9df1af3f5e7602a058982) |
 | Obtimism testnet | [0xEe22f06282174E7cbf7e7b864F5bF8E0b8eDDD62](https://sepolia-optimism.etherscan.io/address/0xee22f06282174e7cbf7e7b864f5bf8e0b8eddd62) |
 | Odyssey testnet | [0x7459455BDDC9f5F53af76eFe857B2064b230E4fe](https://odyssey-explorer.ithaca.xyz/address/0x7459455bddc9f5f53af76efe857b2064b230e4fe) |
