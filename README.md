@@ -66,7 +66,7 @@ forge install rkdud007/solchip8
             <td rowspan="1">Odyssey testnet</td>
             <td rowspan="1">911867</td>
             <td><code><a href="https://github.com/rkdud007/solchip8/blob/3382502e44f840b2d974570b93913e18f761cc0e/src/Solchip8.sol">Solchip8</a></code></td>
-            <td><code><a href="https://odyssey-explorer.ithaca.xyz/address/0x7459455bddc9f5f53af76efe857b2064b230e4fe">0x7459455bddc9f5f53af76efe857b2064b230e4fe</code></td>
+            <td><code><a href="https://odyssey-explorer.ithaca.xyz/address/0xc8c8c8c81fd75f59103ded843a1082ce403885f4">0xc8c8c8c81fd75f59103ded843a1082ce403885f4</code></td>
         </tr>
     </tbody>
 <table>
